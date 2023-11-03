@@ -1,12 +1,13 @@
 #include "utils/utils.hpp"
 #include "camera/camera.hpp"
+#include "L_system/l_system.h"
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
-
+#include "bits/stdc++.h"
 int main(int, char **)
 {
 	// Setup window
@@ -23,7 +24,30 @@ int main(int, char **)
 	cam->setProjectionTransformation(shader_program);
 	cam->setViewTransformation(shader_program);
 
-
+	std::vector<std::string> alphabet = {"A", "F"};
+	std::vector<std::string> parameters = {"s", "w"};
+	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
+	std::unordered_map<std::string, double> constants = {
+		{"alpha1",35},
+		{"alpha2",-35},
+		{"r1",0.75},
+		{"r2",0.77},
+		{"rho1",0},
+		{"rho2",0},
+		{"q",0.50},
+		{"e",0.40},
+		{"min",0.0},
+	};
+	std::vector<std::string> production_rules = {
+		"A(s,w):s>=min→!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*q^e)][+(alpha2)/(rho2)A(s*r2,w*(1-q)^e)]"
+	};
+	std::string axiom = "A(100,30)";
+	int steps = 1;
+	L_System l_system(axiom, alphabet, constants, production_rules, symbols);
+	std::vector<std::string> modules = l_system.generateModule(production_rules[0]);
+	for(int i = 0; i<modules.size(); i++){
+		std::cout<<modules[i]<<std::endl;
+	}
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);

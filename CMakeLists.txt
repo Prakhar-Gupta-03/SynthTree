@@ -13,7 +13,7 @@ find_package(GLEW REQUIRED)
 
 set(SOURCES
 	"src/main.cpp"
-	"src/mesh/mesh.cpp"
+	"src/L_system/l_system.cpp"
 	"src/utils/utils.cpp"
 	"src/camera/camera.cpp"
 	"depends/imgui/imgui_impl_glfw.cpp"
