@@ -39,16 +39,12 @@ int main(int, char **)
 		{"min",0.0},
 	};
 	std::vector<std::string> production_rules = {
-		"A(s,w):s>=min→!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*q^e)][+(alpha2)/(rho2)A(s*r2,w*(1-q)^e)]"
+		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*q^e)][+(alpha2)/(rho2)A(s*r2,w*(1-q)^e)]"
 	};
 	std::string axiom = "A(100,30)";
 	int steps = 1;
 	L_System l_system(axiom, alphabet, constants, production_rules, symbols);
-	std::vector<std::string> modules = l_system.generateModule(production_rules[0]);
-	for(int i = 0; i<modules.size(); i++){
-		std::cout<<modules[i]<<std::endl;
-	}
-
+	std::cout<<l_system.generateWord(steps)<<std::endl;
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	while (!glfwWindowShouldClose(window))
