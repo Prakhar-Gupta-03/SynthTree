@@ -19,8 +19,8 @@ public:
     std::vector<std::string> split_rule(std::string rule) const;
     int num_param(std::string module) const;
     bool matching(std::string module, std::string rule) const;
-    std::string expand(std::string module, std::string rule) const;
     bool condition_check(std::string condition, std::unordered_map<std::string, double> params) const;
     std::unordered_map<std::string, double> variable_value_mapping(std::string rule, std::string module) const;
-    std::string expand(std::string module, std::string rule) const;
+    std::string expand(std::string module, std::string expression, std::unordered_map<std::string, double> params) const;
+    std::string eval(std::string expression, std::unordered_map<std::string, double> params) const;
 };

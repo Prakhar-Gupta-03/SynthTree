@@ -60,8 +60,10 @@ std::unordered_map<std::string, double> L_System::variable_value_mapping(std::st
 }
 
 bool L_System::condition_check(std::string condition, std::unordered_map<std::string, double> params) const {
-    if(condition == ""){
+    if(condition == "True"){
         return true;
+    }else if(condition == "False"){
+        return false;
     }
 
     std::string condition_rule = condition;
@@ -100,8 +102,105 @@ bool L_System::condition_check(std::string condition, std::unordered_map<std::st
     return false;
 }
 
-std::string L_System::expand(std::string module, std::string rule) const {
-    return "";
+std::string L_System::eval(std::string expression, std::unordered_map<std::string, double> params) const {
+    std::string result = expression;
+    for(int i = 0; i<result.length(); i++){
+        if(result[i] == '('){
+            int j = i+1;
+            int count = 1;
+            while(count!=0){
+                if(result[j] == '('){
+                    count++;
+                }else if(result[j] == ')'){
+                    count--;
+                }
+                j++;
+            }
+            j--;
+            std::string to_eval = result.substr(i+1, j-i-1);
+            result = result.replace(i, j-i+1, eval(to_eval, params));
+        }
+    }
+    for(int i = 0; i<result.length(); i++){   
+        if(result[i]=='+' || result[i]=='-' || result[i]=='*' || result[i]=='/' || result[i]=='^'){
+            int j = i-1;
+            while(j>=0 && result[j]!='+' && result[j]!='-' && result[j]!='*' && result[j]!='/' && result[j]!='^'){
+                j--;
+            }
+            std::string left = result.substr(j+1, i-j-1);
+            int k = i+1;
+            while(k<result.length() && result[k]!='+' && result[k]!='-' && result[k]!='*' && result[k]!='/' && result[k]!='^'){
+                k++;
+            }
+            std::string right = result.substr(i+1, k-i-1);
+
+            double left_value, right_value;
+            try{
+                left_value = std::stod(left);
+            }
+            catch (const std::invalid_argument&){
+                left_value = params[left];
+            }
+            try{
+                right_value = std::stod(right);
+            }
+            catch (const std::invalid_argument&){
+                right_value = params[right];
+            }
+            if(result[i]=='+'){
+                result = result.replace(j+1, k-j-1, std::to_string(left_value+right_value));
+            }else if(result[i]=='-'){
+                result = result.replace(j+1, k-j-1, std::to_string(left_value-right_value));
+            }else if(result[i]=='*'){
+                result = result.replace(j+1, k-j-1, std::to_string(left_value*right_value));
+            }else if(result[i]=='/'){
+                result = result.replace(j+1, k-j-1, std::to_string(left_value/right_value));
+            }else if(result[i]=='^'){
+                result = result.replace(j+1, k-j-1, std::to_string(pow(left_value, right_value)));
+            }
+            i = k-1;
+        }
+    }
+    return result;
+}
+std::string L_System::expand(std::string module, std::string expression, std::unordered_map<std::string, double> params) const {
+    std::string result = expression;
+    for(auto itr = params.begin(); itr != params.end(); itr++){
+        size_t index = result.find(itr->first);
+        while(index != std::string::npos){
+            result.replace(index, itr->first.size(), std::to_string(itr->second));
+            index = result.find(itr->first);
+        }
+    }
+    std::stack<int> s;
+    for(int i = 0; i<result.length(); i++){
+
+        if(result[i] == '('){
+            s.push(i);
+        }
+        else if(result[i] == ')' || result[i]==','){
+            if(s.size()!=1){
+                s.pop();
+            }else{
+                int index = s.top();
+                s.pop();
+                bool flag = false;
+                if(result[i]==','){
+                    flag = true;
+                }
+                std::string to_eval = result.substr(index+1, i-index-1);
+                std::string eval_string = eval(to_eval, params);
+                result = result.replace(index+1, to_eval.length(), eval_string);
+                if(flag){
+                    s.push(index + eval_string.length() + 1);
+                }
+                i = index + eval_string.length() + 2;
+            }
+        }
+        
+
+    }
+    return result;
 }
 
 std::string L_System::next_step(std::string& word) const {
@@ -109,23 +208,22 @@ std::string L_System::next_step(std::string& word) const {
     std::vector<std::string> modules = generateModule(word);
     for(int i = 0; i<modules.size(); i++){
         std::string module = modules[i];
-        if(std::find(symbols.begin(), symbols.end(), module) != symbols.end()){
-
+        if(std::find(symbols.begin(), symbols.end(), std::string(1, module[0])) != symbols.end()){
             result += module;
         }else{
             for(int j = 0; j<production_rules.size(); j++){
                 std::vector<std::string> splitted_production_rule = split_rule(production_rules[j]);
-                std::unordered_map <std::string, double> params = variable_value_mapping(splitted_production_rule[0], module);
-                if(matching(module, splitted_production_rule[0]) && condition_check(splitted_production_rule[1], params)){
-                    result += expand(module, production_rules[j]);
+                if(matching(module, splitted_production_rule[0])){
+                    std::unordered_map <std::string, double> params = variable_value_mapping(splitted_production_rule[0], module);
+                    if(condition_check(splitted_production_rule[1], params)){
+                        result += expand(module, splitted_production_rule[2], params);
+                    }
                 }
             }
         }
     }
     return result;
 }
-
-
 
 std::string L_System::generateWord(const int steps) const{
     std::string word = axioms;

@@ -24,8 +24,7 @@ int main(int, char **)
 	cam->setProjectionTransformation(shader_program);
 	cam->setViewTransformation(shader_program);
 
-	std::vector<std::string> alphabet = {"A", "F"};
-	std::vector<std::string> parameters = {"s", "w"};
+	std::vector<std::string> alphabets = {"A", "F"};
 	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
 	std::unordered_map<std::string, double> constants = {
 		{"alpha1",35},
@@ -39,11 +38,12 @@ int main(int, char **)
 		{"min",0.0},
 	};
 	std::vector<std::string> production_rules = {
-		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*q^e)][+(alpha2)/(rho2)A(s*r2,w*(1-q)^e)]"
+		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
+		"F(s):True?F(s)"
 	};
-	std::string axiom = "A(100,30)";
-	int steps = 1;
-	L_System l_system(axiom, alphabet, constants, production_rules, symbols);
+	std::string axiom = "A(-0.1,30)";
+	int steps = 9;
+	L_System l_system(axiom, alphabets, constants, production_rules, symbols);
 	std::cout<<l_system.generateWord(steps)<<std::endl;
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
