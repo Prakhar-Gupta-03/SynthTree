@@ -232,3 +232,7 @@ std::string L_System::generateWord(const int steps) const{
     }
     return word;
 }
+
+
+
+

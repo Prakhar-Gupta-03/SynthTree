@@ -1,29 +1,23 @@
 #include "utils/vector3D.h"
 #include "color/color.h"
-
+#include "globals.hpp"
 class State{
 private:
-    Vector3D position;
-    Vector3D H; // Heading
-    Vector3D L; // Left
-    Vector3D U; // Up
+    glm::vec3 position;
+    glm::mat3 HLU;
     Color color;
     double width;
 public:
-    State(Vector3D pos, Vector3D h, Vector3D l, Vector3D u, Color c, double w):
-        position(pos), H(h), L(l), U(u), color(c), width(w) {}
-    Vector3D getPosition() const { return position; }
-    Vector3D getH() const { return H; }
-    Vector3D getL() const { return L; }
-    Vector3D getU() const { return U; }
+    State(glm::vec3 pos, glm::mat3 HLU_, Color c, double w):
+        position(pos), HLU(HLU_), color(c), width(w) {}
     Color getColor() const { return color; }
     double getWidth() const { return width; }
-
-    void setPosition(Vector3D pos) { position = pos; }
-    void setH(Vector3D h) { H = h; }
-    void setL(Vector3D l) { L = l; }
-    void setU(Vector3D u) { U = u; }
     void setColor(Color c) { color = c; }
     void setWidth(double w) { width = w; }
+    glm::vec3 getPosition() const { return position; }
+    glm::mat3 getHLU() const { return HLU; }
+    void setPosition(glm::vec3 pos) { position = pos; }
+    void setHLU(glm::mat3 HLU_) { HLU = HLU_; }
+    State copy() const { return State(position, HLU, color, width); }
 
 };
