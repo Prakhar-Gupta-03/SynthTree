@@ -18,7 +18,6 @@ set(SOURCES
 	"src/utils/vector3D.cpp"
 	"src/camera/camera.cpp"
 	"src/color/color.cpp"
-	"src/state/state.cpp"
 	"src/turtle/turtle.cpp"
 	"depends/imgui/imgui_impl_glfw.cpp"
 	"depends/imgui/imgui_impl_opengl3.cpp"

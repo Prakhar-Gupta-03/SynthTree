@@ -24,6 +24,13 @@ void Camera::setProjectionTransformation(unsigned int &shader_program)
     glUniformMatrix4fv(vProjection_uniform, 1, GL_FALSE, glm::value_ptr(projection_t));
 }
 
+void Camera::setModelTransformation(unsigned int &shader_program)
+{
+    glUseProgram(shader_program);
+    unsigned int vModel_uniform = getUniform(shader_program, "vModel");
+    glUniformMatrix4fv(vModel_uniform, 1, GL_FALSE, glm::value_ptr(glm::identity<glm::mat4>()));
+}
+
 void Camera::process_keys(GLFWwindow *window, float deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)

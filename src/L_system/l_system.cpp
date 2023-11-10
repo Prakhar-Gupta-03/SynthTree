@@ -1,6 +1,7 @@
 #include "l_system.h"
 
-std::vector<std::string> L_System::generateModule(std::string& word) const {
+// Split the word string into modules where each module is a single instruction for the turtle
+std::vector<std::string> L_System::generateModule(std::string& word) const { 
     std::vector<std::string> modules;
     std::string module = "";
     for(int i = 0; i<word.size(); i++){
@@ -20,11 +21,13 @@ std::vector<std::string> L_System::generateModule(std::string& word) const {
     return modules;
 }
 
+// Split the production rule into 3 parts: the module, the condition and the expression
 std::vector<std::string> L_System::split_rule(std::string rule) const {
     size_t index1 = rule.find(':'), index2 = rule.find('?');
     return {rule.substr(0, index1), rule.substr(index1+1, index2-index1-1), rule.substr(index2+1)};
 }
 
+// Count the number of parameters in a module
 int L_System::num_param(std::string module) const {
     if(module.find("()") != std::string::npos){
         return 0;
@@ -32,11 +35,13 @@ int L_System::num_param(std::string module) const {
     return std::count(module.begin(), module.end(), ',') + 1;
 }
 
+// Check if the module and the production rule match
 bool L_System::matching(std::string module, std::string splitted_rule) const {
 
     return splitted_rule[0]==module[0] && num_param(splitted_rule) == num_param(module);
 }
 
+// Create a mapping from the variables in the production rule to the values in the module
 std::unordered_map<std::string, double> L_System::variable_value_mapping(std::string rule, std::string module) const {
     std::unordered_map<std::string, double> params;
     size_t index1 = rule.find('('), index2 = rule.find(',');
@@ -59,6 +64,7 @@ std::unordered_map<std::string, double> L_System::variable_value_mapping(std::st
     return params;
 }
 
+// Check if the condition is true or false
 bool L_System::condition_check(std::string condition, std::unordered_map<std::string, double> params) const {
     if(condition == "True"){
         return true;
@@ -102,6 +108,8 @@ bool L_System::condition_check(std::string condition, std::unordered_map<std::st
     return false;
 }
 
+
+// Evaluate a mathematical expression with the given parameters
 std::string L_System::eval(std::string expression, std::unordered_map<std::string, double> params) const {
     std::string result = expression;
     for(int i = 0; i<result.length(); i++){
@@ -163,6 +171,8 @@ std::string L_System::eval(std::string expression, std::unordered_map<std::strin
     }
     return result;
 }
+
+// Expand the expression by evaluating the mathematical expressions and replacing the variables with their values
 std::string L_System::expand(std::string module, std::string expression, std::unordered_map<std::string, double> params) const {
     std::string result = expression;
     for(auto itr = params.begin(); itr != params.end(); itr++){
@@ -203,6 +213,7 @@ std::string L_System::expand(std::string module, std::string expression, std::un
     return result;
 }
 
+// Generate the next step of the L-System
 std::string L_System::next_step(std::string& word) const {
     std::string result = "";
     std::vector<std::string> modules = generateModule(word);
@@ -225,6 +236,7 @@ std::string L_System::next_step(std::string& word) const {
     return result;
 }
 
+// Expand the axiom using the production rules to generate the string that the turtle will parse
 std::string L_System::generateWord(const int steps) const{
     std::string word = axioms;
     for (int i = 0; i<steps; i++){

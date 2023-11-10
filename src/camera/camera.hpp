@@ -42,6 +42,7 @@ public:
     inline glm::mat4 getView(){return view_t;}
     void setViewTransformation(unsigned int &shaderProgram);
     void setProjectionTransformation(unsigned int &shaderProgram);
+    void setModelTransformation(unsigned int &shaderProgram);
     void setCamPos(unsigned int &shaderProgram);
 };
 #endif

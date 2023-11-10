@@ -1,5 +1,6 @@
 #include "turtle.h"
 
+// Using the modules, the turtle will parse the string and return a vector of vertices that will be drawn. The meaning of the symbols are the same as used in the paper provided.
 std::vector<float> Turtle::parser(std::vector<std::string> modules) {
     std::vector<float> vertices;
     for(int i = 0; i<modules.size(); i++){
@@ -29,31 +30,34 @@ std::vector<float> Turtle::parser(std::vector<std::string> modules) {
     return vertices;
 }
 
-void Turtle::forward(double distance, std::vector<float>& vertices){
+// This function is to move the turtle forward by a certain distance and add the vertices to the vector of vertices.
+void Turtle::forward(double distance, std::vector<float>& vertices){ 
     glm::vec3 position = current_state.getPosition();
     glm::mat3 HLU = current_state.getHLU();
-    glm::vec3 direction = glm::transpose(HLU)[0];
-    glm::vec3 new_position = position + float(distance)*direction;
+    glm::vec3 direction_f = glm::transpose(HLU)[0], direction_l = glm::transpose(HLU)[1];
+
+    glm::vec3 new_position = position + float(distance)*direction_f;
     current_state.setPosition(new_position);
-    vertices.push_back(position.x);
-    vertices.push_back(position.y);
-    vertices.push_back(position.z);
-    vertices.push_back(new_position.x);
-    vertices.push_back(new_position.y);
-    vertices.push_back(new_position.z);
+    
+    vertices.push_back(position[0]);
+    vertices.push_back(position[1]);
+    vertices.push_back(position[2]);
+    vertices.push_back(new_position[0]);
+    vertices.push_back(new_position[1]);
+    vertices.push_back(new_position[2]);
 
 }
-
+// This function is to save the current state of the turtle. This is used when the turtle encounters a '[' symbol. 
 void Turtle::saveState(){
     states.push(current_state);
     current_state = current_state.copy();
 }
-
+// This function is to restore the state of the turtle to the last saved state. This is used when the turtle encounters a ']' symbol.
 void Turtle::restoreState(){
     current_state = states.top();
     states.pop();
 }
-
+// This function is to rotate the turtle about the up vector of the turtle by a certain angle.
 void Turtle::Ru(double angle){
     angle = glm::radians(angle);
     glm::mat3 HLU = current_state.getHLU();
@@ -66,7 +70,7 @@ void Turtle::Ru(double angle){
     }
     current_state.setHLU(new_HLU);
 }
-
+// This function is to rotate the turtle about the left vector of the turtle by a certain angle.
 void Turtle::Rh(double angle){
     glm::mat3 HLU = current_state.getHLU();
     angle = glm::radians(angle);
@@ -79,7 +83,7 @@ void Turtle::Rh(double angle){
     }
     current_state.setHLU(new_HLU);
 }
-
+// This function is to rotate the turtle about the forward vector of the turtle by a certain angle.
 void Turtle::Rl(double angle){
     glm::mat3 HLU = current_state.getHLU();
     angle = glm::radians(angle);
@@ -92,7 +96,55 @@ void Turtle::Rl(double angle){
     }
     current_state.setHLU(new_HLU);
 }
-
+// This function is to change the width of the turtle.
 void Turtle::changeWidth(double width){
     current_state.setWidth(width);
+}
+// This function is to draw a line between two vertices.
+void Turtle::drawLine(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
+{
+	glUseProgram(shaderprogram);
+	glBindVertexArray(VAO);
+
+	// Bind the VBO and copy the vertex data to the GPU
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+	unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
+	glEnableVertexAttribArray(vVertex_attrib);
+	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	// Draw the triangle
+	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 3);
+
+	// Cleanup
+	glDisableVertexAttribArray(vVertex_attrib);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+}
+
+void Turtle::drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
+{
+    glUseProgram(shaderprogram);
+    glBindVertexArray(VAO);
+
+    // Bind the VBO and copy the vertex data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
+    glEnableVertexAttribArray(vVertex_attrib);
+    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    // Draw the triangle
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size() / 3);
+
+    // Cleanup
+    glDisableVertexAttribArray(vVertex_attrib);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
+
 }
