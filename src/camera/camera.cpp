@@ -9,7 +9,7 @@ void Camera::setCamPos(unsigned int &shader_program)
 
 void Camera::setViewTransformation(unsigned int &shader_program)
 {
-    view_t = glm::lookAt(glm::vec3(cam_pos), glm::vec3(cam_pos + cam_front), cam_up);
+    view_t = glm::lookAt(glm::vec3(cam_pos), glm::vec3(0.0), cam_up);
     glUseProgram(shader_program);
     unsigned int vView_uniform = getUniform(shader_program, "vView");
     glUniformMatrix4fv(vView_uniform, 1, GL_FALSE, glm::value_ptr(view_t));
@@ -35,18 +35,20 @@ void Camera::process_keys(GLFWwindow *window, float deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         deltaTime = 10 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-            cam_pos += deltaTime * SPEED * glm::vec3(0.0f, 1.0f, 0.0f);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam_pos += deltaTime * SPEED * cam_front;
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-            cam_pos -= deltaTime * SPEED * glm::vec3(0.0f, 1.0f, 0.0f);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam_pos -= deltaTime * SPEED * cam_front;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cam_pos -= deltaTime * SPEED * glm::normalize(glm::cross(cam_front, cam_up));
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cam_pos += deltaTime * SPEED * glm::normalize(glm::cross(cam_front, cam_up));
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) // +y
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // -z
+            cam_pos  = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)) * view_t * glm::vec4(cam_pos, 1.0f));
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) // -y
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // +z
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)) * view_t * glm::vec4(cam_pos, 1.0f));
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // -x
+        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // +x
+        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+        
+        // cam_pos += deltaTime * SPEED * glm::normalize(glm::cross(cam_front, cam_up));
 }
 
 //Taken from learnopengl.com camera tutorial.
@@ -73,7 +75,9 @@ void Camera::mouse_motion(double xpos, double ypos)
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         direction.y = sin(glm::radians(pitch));
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cam_front = glm::normalize(direction);
+        direction = glm::normalize(direction);
+        
+
     }
 }
 

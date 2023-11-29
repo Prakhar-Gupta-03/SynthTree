@@ -39,13 +39,17 @@ void Turtle::forward(double distance, std::vector<float>& vertices){
     glm::vec3 new_position = position + float(distance)*direction_f;
     current_state.setPosition(new_position);
     
-    vertices.push_back(position[0]);
-    vertices.push_back(position[1]);
-    vertices.push_back(position[2]);
-    vertices.push_back(new_position[0]);
-    vertices.push_back(new_position[1]);
-    vertices.push_back(new_position[2]);
+    double top_radius = current_state.getWidth();
+    double bottom_radius = current_state.getWidth();
+    if(states.size()>0){
+        bottom_radius = states.top().getWidth();
+    }
 
+    Cylinder cylinder = Cylinder(position, new_position, bottom_radius, top_radius);
+    std::vector<float> cylinder_vertices = cylinder.generateTriangles();
+    for(int i = 0; i<cylinder_vertices.size(); i++){
+        vertices.push_back(cylinder_vertices[i]);
+    }
 }
 // This function is to save the current state of the turtle. This is used when the turtle encounters a '[' symbol. 
 void Turtle::saveState(){

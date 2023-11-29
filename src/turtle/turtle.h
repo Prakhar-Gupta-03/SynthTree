@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include "globals.hpp"
 #include "utils/utils.hpp"
+#include "shapes/cylinder.h"
 
 
 class Turtle{

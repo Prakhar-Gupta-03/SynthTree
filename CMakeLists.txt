@@ -19,6 +19,7 @@ set(SOURCES
 	"src/camera/camera.cpp"
 	"src/color/color.cpp"
 	"src/turtle/turtle.cpp"
+	"src/shapes/cylinder.cpp"
 	"depends/imgui/imgui_impl_glfw.cpp"
 	"depends/imgui/imgui_impl_opengl3.cpp"
 	"depends/imgui/imgui.cpp"

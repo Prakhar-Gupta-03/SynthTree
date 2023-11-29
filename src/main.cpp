@@ -32,17 +32,17 @@ int main(int, char **)
 	// Defining L-System
 	std::vector<std::string> alphabets = {"A", "F"};
 	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
-	std::string axiom = "A(100,5)";
+	std::string axiom = "A(100,40)";
 	std::unordered_map<std::string, double> constants = {
-		{"alpha1",-5},
-		{"alpha2",30},
-		{"r1",0.55},
-		{"r2",0.95},
-		{"rho1",137},
-		{"rho2",137},
-		{"q",0.40},
-		{"e",0.00},
-		{"min",5.0},
+		{"alpha1",5},
+		{"alpha2",-30},
+		{"r1",0.95},
+		{"r2",0.75},
+		{"rho1",-90},
+		{"rho2",90},
+		{"q",0.60},
+		{"e",0.45},
+		{"min",25.0},
 	};
 	std::vector<std::string> production_rules = {
 		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
@@ -72,7 +72,7 @@ int main(int, char **)
 	std::vector<float> vertices = turtle.parser(modules);
 	// scaling the vertices to fit the screen
 	for(int i = 0; i<vertices.size(); i++){
-		vertices[i] = vertices[i]/100.0f;
+		vertices[i] = vertices[i]/50.0f;
 	}
 
 	// Setting up VAO and VBO
@@ -115,8 +115,9 @@ int main(int, char **)
 		glClearColor(WHITE.x, WHITE.y, WHITE.z, WHITE.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for(int i = 0; i<vertices.size(); i+=6){
-			turtle.drawLine({vertices[i], vertices[i+1], vertices[i+2], vertices[i+3], vertices[i+4], vertices[i+5]}, shaderprogram, VAO, VBO);
+		for(int i = 0; i<vertices.size(); i+=9){
+			std::vector<float> triangle = {vertices[i], vertices[i+1], vertices[i+2], vertices[i+3], vertices[i+4], vertices[i+5], vertices[i+6], vertices[i+7], vertices[i+8]};
+			turtle.drawTriangle(triangle, shaderprogram, VAO, VBO);
 		}
 
 
