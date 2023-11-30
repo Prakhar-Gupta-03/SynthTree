@@ -12,13 +12,14 @@ Implementation of the paper [L-systems: From the theory to visual models of plan
 3. `bash build.sh`
 4. Run `./L-System-Based-3D-Tree-Modelling`
 
-## Intermediate Results
+## Final Results
 
 # L-system-tree-modelling
 Implementation of the paper "L-systems: from the theory to visual models of plants" as a course project for CSE333: Computer Graphics
-![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/bac2d491-43fa-4284-9dc4-5b87486e3a3f)
-![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/5451f901-5f8e-494d-85fa-1fbf34ca9d30)
-![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/c5bb5f44-44e2-438c-9bea-520520d10c02)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/71fea13f-dc2e-4256-b056-368c01b494c6)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/9e83c502-67bc-48ed-a4da-5da401759d37)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/6145f6ca-533c-45fd-aab7-9f1a504d80e5)
+
 
 
 
