@@ -18,8 +18,10 @@ Implementation of the paper "[L-systems: From the theory to visual models of pla
 
 # L-system-tree-modelling
 Implementation of the paper "L-systems: from the theory to visual models of plants" as a course project for CSE333: Computer Graphics
-![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/ee5b19e8-6c43-49d1-b36f-fd22c8b7a72e)
-![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/29eeee39-9a98-456a-aa6a-d25a9b94d59a)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/bac2d491-43fa-4284-9dc4-5b87486e3a3f)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/5451f901-5f8e-494d-85fa-1fbf34ca9d30)
+![image](https://github.com/Prakhar-Gupta-03/L-system-tree-modelling/assets/108022785/c5bb5f44-44e2-438c-9bea-520520d10c02)
+
 
 
 
