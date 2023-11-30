@@ -140,10 +140,13 @@ void Turtle::drawTriangle(std::vector<float> vertices, unsigned int &shaderprogr
 
     unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
     glEnableVertexAttribArray(vVertex_attrib);
-    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 
+    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
+    glEnableVertexAttribArray(texCord_attrib);
+    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     // Draw the triangle
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size() / 3);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size() / 5);
 
     // Cleanup
     glDisableVertexAttribArray(vVertex_attrib);

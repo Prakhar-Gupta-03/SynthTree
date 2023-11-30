@@ -2,13 +2,37 @@
 #include "camera/camera.hpp"
 #include "L_system/l_system.h"
 #include "turtle/turtle.h"
-// #include "state/state.h"
 #include "color/color.h"
 #define GLM_FORCE_RADIANS
 #define GLM_ENABLE_EXPERIMENTAL
 #include "globals.hpp"
 #include "bits/stdc++.h"
-	
+#define STB_IMAGE_IMPLEMENTATION
+#include "../depends/stb/stb_image.h"
+
+GLuint tex;
+
+bool loadImagetoTexture(const char *filename)
+{
+	glGenTextures(1, &tex);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int image_width, image_height;
+	unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+	if(image_data==NULL) return false;
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(image_data);
+	return true;
+}
+
 
 int main(int, char **)
 {
@@ -22,6 +46,8 @@ int main(int, char **)
 	// create shader program
 	unsigned int shaderprogram = createProgram("shaders/vshader.vs", "shaders/fshader.fs");
 	
+	assert(loadImagetoTexture("textures/texture2.jpg"));
+
 	// Setup camera
 	glm::vec3 cam_position = glm::vec3(0.0f, 0.0f, 20.0f), cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f), cam_up = glm::vec3(0.0f, 1.0f, 0.0f);
 	Camera *cam = new Camera(cam_position, cam_look_at, cam_up, 45.0f, 0.1f, 10000.0f, window);
@@ -114,11 +140,7 @@ int main(int, char **)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(WHITE.x, WHITE.y, WHITE.z, WHITE.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		for(int i = 0; i<vertices.size(); i+=9){
-			std::vector<float> triangle = {vertices[i], vertices[i+1], vertices[i+2], vertices[i+3], vertices[i+4], vertices[i+5], vertices[i+6], vertices[i+7], vertices[i+8]};
-			turtle.drawTriangle(triangle, shaderprogram, VAO, VBO);
-		}
+		turtle.drawTriangle(vertices, shaderprogram, VAO, VBO);
 
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
