@@ -51,7 +51,7 @@ void Turtle::forward(double distance, std::vector<float>& vertices, std::vector<
     for(int i = 0; i<cylinder_vertices.size(); i++){
         vertices.push_back(cylinder_vertices[i]);
     }
-    if(bottom_radius>=2) return;
+    if(bottom_radius>=leaf_threshold) return;
     Leaf leaf = Leaf(position, new_position, bottom_radius, top_radius);
     std::vector<float> leaf_vertices_ = leaf.generateVertices();
     for(int i = 0; i<leaf_vertices_.size(); i++){
@@ -110,59 +110,4 @@ void Turtle::Rl(double angle){
 // This function is to change the width of the turtle.
 void Turtle::changeWidth(double width){
     current_state.setWidth(width);
-}
-// This function is to draw a line between two vertices.
-void Turtle::drawLine(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
-{
-	glUseProgram(shaderprogram);
-	glBindVertexArray(VAO);
-
-	// Bind the VBO and copy the vertex data to the GPU
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-	unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
-    glEnableVertexAttribArray(vVertex_attrib);
-    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
-    glEnableVertexAttribArray(texCord_attrib);
-    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	// Draw the triangle
-	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 5);
-
-	// Cleanup
-	glDisableVertexAttribArray(vVertex_attrib);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glUseProgram(0);
-
-}
-
-void Turtle::drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
-{
-    glUseProgram(shaderprogram);
-    glBindVertexArray(VAO);
-
-    // Bind the VBO and copy the vertex data to the GPU
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
-    glEnableVertexAttribArray(vVertex_attrib);
-    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-
-    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
-    glEnableVertexAttribArray(texCord_attrib);
-    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    // Draw the triangle
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size() / 5);
-
-    // Cleanup
-    glDisableVertexAttribArray(vVertex_attrib);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
-
 }

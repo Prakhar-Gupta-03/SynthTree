@@ -9,11 +9,13 @@
 #include "bits/stdc++.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../depends/stb/stb_image.h"
+#include "imgui.h"
 
 GLuint tree_texture, leaf_texture;
 GLuint tex1, tex2, tex3;
 GLuint leaf_tex1, leaf_tex2, leaf_tex3;
 bool leaves = true;
+int tree_num = 1;
 
 bool loadImagetoTexture(const char *filename, GLuint &tex)
 {
@@ -35,6 +37,97 @@ bool loadImagetoTexture(const char *filename, GLuint &tex)
 	return true;
 }
 
+std::vector<std::vector<float>> getVertices(std::unordered_map<std::string, double> &constants, std::string axiom, int recursive_steps, float scale, float leaf_threshold){
+	std::vector<std::string> alphabets = {"A", "F"};
+	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
+
+	std::vector<std::string> production_rules = {
+		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
+		"F(s):True?F(s)"
+	};
+
+	L_System l_system(axiom, alphabets, constants, production_rules, symbols);
+
+	std::string word = l_system.generateWord(recursive_steps); 
+
+	std::vector<std::string> modules = l_system.generateModule(word); 
+
+	glm::vec3 turtle_pos = glm::vec3(0,-500,0);
+
+	glm::mat4 HLU = glm::transpose(glm::mat3(glm::vec3(0,1,0), glm::vec3(-1,0,0), glm::vec3(0,0,1))); 
+	
+	double w = 1.0;
+
+	Turtle turtle = Turtle(State(turtle_pos, HLU, w), leaf_threshold);
+
+	// Parse the string and generate the vertices of the tree
+
+	std::vector<std::vector<float>> v = turtle.parser(modules);
+
+	for(int i = 0; i<v.size(); i++){
+		for(int j = 0; j<v[i].size(); j++){
+			v[i][j] *= scale;
+		}
+	}
+
+	return v;
+}
+
+// This function is to draw a line between two vertices.
+void drawLine(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
+{
+	glUseProgram(shaderprogram);
+	glBindVertexArray(VAO);
+
+	// Bind the VBO and copy the vertex data to the GPU
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+	unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
+    glEnableVertexAttribArray(vVertex_attrib);
+    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
+    glEnableVertexAttribArray(texCord_attrib);
+    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	// Draw the triangle
+	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 5);
+
+	// Cleanup
+	glDisableVertexAttribArray(vVertex_attrib);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+}
+
+void drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsigned int &VAO, unsigned int &VBO)
+{
+    glUseProgram(shaderprogram);
+    glBindVertexArray(VAO);
+
+    // Bind the VBO and copy the vertex data to the GPU
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
+    glEnableVertexAttribArray(vVertex_attrib);
+    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
+    glEnableVertexAttribArray(texCord_attrib);
+    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    // Draw the triangle
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertices.size() / 5);
+
+    // Cleanup
+    glDisableVertexAttribArray(vVertex_attrib);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
+
+}
 
 int main(int, char **)
 {
@@ -65,10 +158,9 @@ int main(int, char **)
 	cam->setModelTransformation(shaderprogram);
 
 	// Defining L-System
-	std::vector<std::string> alphabets = {"A", "F"};
-	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
-	std::string axiom = "A(100,30)";
-	std::unordered_map<std::string, double> constants = {
+	
+	std::string axiom_tree1 = "A(100,30)";
+	std::unordered_map<std::string, double> constants_tree1 = {
 		{"alpha1",30},
 		{"alpha2",-30},
 		{"r1",0.80},
@@ -79,39 +171,40 @@ int main(int, char **)
 		{"e",0.50},
 		{"min",0.0}
 	};
-	std::vector<std::string> production_rules = {
-		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
-		"F(s):True?F(s)"
-	};
-	
-	// Creating L-System with the above defined parameters
-	L_System l_system(axiom, alphabets, constants, production_rules, symbols);
+	int recursive_steps_tree1 = 10;
 
-	int recursive_steps = 10;
-	// generating the string that the turtle will parse to generate the vertices of the tree
-	std::string word = l_system.generateWord(recursive_steps); 
-	// splitting the string into modules. Each module is a single instruction for the turtle
-	std::vector<std::string> modules = l_system.generateModule(word); 
+	std::string axiom_tree2 = "A(100,40)";
+	std::unordered_map<std::string, double> constants_tree2 = {
+		{"alpha1",5},
+		{"alpha2",-30},
+		{"r1",0.95},
+		{"r2",0.75},
+		{"rho1",-90},
+		{"rho2",90},
+		{"q",0.60},
+		{"e",0.45},
+		{"min",25.0}
+	};
+	int recursive_steps_tree2 = 12;
+
+	std::string axiom_tree3 = "A(100,20)";
+	std::unordered_map<std::string, double> constants_tree3 = {
+		{"alpha1",-5},
+		{"alpha2",30},
+		{"r1",0.55},
+		{"r2",0.95},
+		{"rho1",137},
+		{"rho2",137},
+		{"q",0.40},
+		{"e",0.25},
+		{"min",5.0}
+	};
+	int recursive_steps_tree3 = 12;
 	
-	glm::vec3 turtle_pos = glm::vec3(0,-500,0); // initial position of the turtle
-	// initial HLU space of the turtle
-	glm::mat4 HLU = glm::transpose(glm::mat3(glm::vec3(0,1,0), glm::vec3(-1,0,0), glm::vec3(0,0,1))); 
-	
-	// Setting up initial color and width of the tree that the turtle will draw
-	Color c = Color(0,0,0); 
-	double w = 1; 
-	
-	Turtle turtle = Turtle(State(turtle_pos, HLU, c, w));
-	// Parse the string and generate the vertices of the tree
-	std::vector<std::vector<float>> v = turtle.parser(modules);
-	std::vector<float> vertices = v[0], leaf_vertices = v[1];
-	// scaling the vertices to fit the screen
-	for(int i = 0; i<vertices.size(); i++){
-		vertices[i] = vertices[i]/50.0f;
-	}
-	for(int i = 0; i<leaf_vertices.size(); i++){
-		leaf_vertices[i] = leaf_vertices[i]/50.0f;
-	}
+	std::vector<std::vector<float>> v_tree1 = getVertices(constants_tree1, axiom_tree1, recursive_steps_tree1, 0.02, 2);
+	std::vector<std::vector<float>> v_tree2 = getVertices(constants_tree2, axiom_tree2, recursive_steps_tree2, 0.02, 20);
+	std::vector<std::vector<float>> v_tree3 = getVertices(constants_tree3, axiom_tree3, recursive_steps_tree3, 0.02, 5); 
+	std::vector<std::vector<float>> v_tree = v_tree1;
 
 	// Setting up VAO and VBO
 	unsigned int VAO, VBO;
@@ -136,6 +229,8 @@ int main(int, char **)
 		ImGui::NewFrame();
 
 		double curr_time = static_cast<double>(glfwGetTime());
+		
+
 		delta_time = curr_time - last_time;
 		last_time = curr_time;
 
@@ -144,7 +239,9 @@ int main(int, char **)
 			cam->process_input(window, delta_time);
 			cam->setViewTransformation(shaderprogram);
 		}
-		
+
+		ImGui::SetNextWindowPos(ImVec2(10, 10));
+		ImGui::SetNextWindowSize(ImVec2(150, 275));
 		ImGui::Begin("Select Texture");
 		ImGui::Text("Select Texture");
 		ImGui::Text("Texture 1");
@@ -161,6 +258,8 @@ int main(int, char **)
 		}
 		ImGui::End();
 
+		ImGui::SetNextWindowPos(ImVec2(10, 300));
+		ImGui::SetNextWindowSize(ImVec2(150, 100));
 		ImGui::Begin("Leaves or not ?");
 		if(ImGui::RadioButton("Leaves", leaves)){
 			leaves = true;
@@ -171,6 +270,8 @@ int main(int, char **)
 		}
 		ImGui::End();
 
+		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 160, 10));
+		ImGui::SetNextWindowSize(ImVec2(150, 275));
 		ImGui::Begin("Select Leaf Texture");
 		ImGui::Text("Select Texture");
 		ImGui::Text("Texture 1");
@@ -187,6 +288,23 @@ int main(int, char **)
 		}
 		ImGui::End();
 
+		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 160, 300));
+		ImGui::SetNextWindowSize(ImVec2(150, 125));
+		ImGui::Begin("Select Tree");
+		ImGui::Text("Select Tree");
+		if(ImGui::RadioButton("Tree 1", tree_num==1)){
+			tree_num = 1;
+			v_tree = v_tree1;
+		}
+		if(ImGui::RadioButton("Tree 2", tree_num==2)){
+			tree_num = 2;
+			v_tree = v_tree2;
+		}
+		if(ImGui::RadioButton("Tree 3", tree_num==3)){
+			tree_num = 3;
+			v_tree = v_tree3;
+		}
+		ImGui::End();
 
 		// Rendering
 		ImGui::Render();
@@ -198,17 +316,17 @@ int main(int, char **)
 
 		glBindTexture(GL_TEXTURE_2D, tree_texture);
 
-		for(int i = 0; i<vertices.size(); i+=15){
-			std::vector<float> v = {vertices[i], vertices[i+1], vertices[i+2], vertices[i+3], vertices[i+4], vertices[i+5], vertices[i+6], vertices[i+7], vertices[i+8], vertices[i+9], vertices[i+10], vertices[i+11], vertices[i+12], vertices[i+13], vertices[i+14]};
-			turtle.drawTriangle(v, shaderprogram, VAO, VBO);
+		for(int i = 0; i<v_tree[0].size(); i+=15){
+			std::vector<float> v = {v_tree[0][i], v_tree[0][i+1], v_tree[0][i+2], v_tree[0][i+3], v_tree[0][i+4], v_tree[0][i+5], v_tree[0][i+6], v_tree[0][i+7], v_tree[0][i+8], v_tree[0][i+9], v_tree[0][i+10], v_tree[0][i+11], v_tree[0][i+12], v_tree[0][i+13], v_tree[0][i+14]};
+			drawTriangle(v, shaderprogram, VAO, VBO);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, leaf_texture);
 
 		if(leaves){
-			for(int i = 0; i<leaf_vertices.size(); i+=10){
-				std::vector<float> v = {leaf_vertices[i], leaf_vertices[i+1], leaf_vertices[i+2], leaf_vertices[i+3], leaf_vertices[i+4], leaf_vertices[i+5], leaf_vertices[i+6], leaf_vertices[i+7], leaf_vertices[i+8], leaf_vertices[i+9]};
-				turtle.drawLine(v, shaderprogram, VAO, VBO);
+			for(int i = 0; i<v_tree[1].size(); i+=10){
+				std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
+				drawLine(v, shaderprogram, VAO, VBO);
 			}
 		}
 		
