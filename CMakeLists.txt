@@ -20,6 +20,7 @@ set(SOURCES
 	"src/color/color.cpp"
 	"src/turtle/turtle.cpp"
 	"src/shapes/cylinder.cpp"
+	"src/shapes/leaf.cpp"
 	"depends/imgui/imgui_impl_glfw.cpp"
 	"depends/imgui/imgui_impl_opengl3.cpp"
 	"depends/imgui/imgui.cpp"

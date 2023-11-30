@@ -36,17 +36,17 @@ void Camera::process_keys(GLFWwindow *window, float deltaTime)
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         deltaTime = 10 * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) // +y
-            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) // -z
-            cam_pos  = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)) * view_t * glm::vec4(cam_pos, 1.0f));
+            cam_pos  = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.5f)) * view_t * glm::vec4(cam_pos, 1.0f));
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) // -y
-            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) // +z
-            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)) * view_t * glm::vec4(cam_pos, 1.0f));
+            cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.5f)) * view_t * glm::vec4(cam_pos, 1.0f));
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) // -x
-        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) // +x
-        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
+        cam_pos = glm::vec3(glm::inverse(view_t) * glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)) * view_t * glm::vec4(cam_pos, 1.0f));
         
         // cam_pos += deltaTime * SPEED * glm::normalize(glm::cross(cam_front, cam_up));
 }

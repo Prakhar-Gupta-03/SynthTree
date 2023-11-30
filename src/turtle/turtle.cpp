@@ -1,12 +1,13 @@
 #include "turtle.h"
-
+#include "shapes/leaf.h"
 // Using the modules, the turtle will parse the string and return a vector of vertices that will be drawn. The meaning of the symbols are the same as used in the paper provided.
-std::vector<float> Turtle::parser(std::vector<std::string> modules) {
+std::vector<std::vector<float>> Turtle::parser(std::vector<std::string> modules) {
     std::vector<float> vertices;
+    std::vector<float> leaf_vertices;
     for(int i = 0; i<modules.size(); i++){
         std::string module = modules[i];
         if(module[0]=='F'){
-            forward(std::stod(module.substr(2, module.size()-3)), vertices);
+            forward(std::stod(module.substr(2, module.size()-3)), vertices, leaf_vertices);
         }else if(module[0]=='['){
             saveState();
         }else if(module[0]==']'){
@@ -27,18 +28,18 @@ std::vector<float> Turtle::parser(std::vector<std::string> modules) {
             Rl(-std::stod(module.substr(2, module.size()-3)));
         }
     }
-    return vertices;
+    return {vertices, leaf_vertices};
 }
 
 // This function is to move the turtle forward by a certain distance and add the vertices to the vector of vertices.
-void Turtle::forward(double distance, std::vector<float>& vertices){ 
+void Turtle::forward(double distance, std::vector<float>& vertices, std::vector<float>& leaf_vertices){ 
     glm::vec3 position = current_state.getPosition();
     glm::mat3 HLU = current_state.getHLU();
     glm::vec3 direction_f = glm::transpose(HLU)[0], direction_l = glm::transpose(HLU)[1];
 
     glm::vec3 new_position = position + float(distance)*direction_f;
     current_state.setPosition(new_position);
-    
+
     double top_radius = current_state.getWidth();
     double bottom_radius = current_state.getWidth();
     if(states.size()>0){
@@ -49,6 +50,12 @@ void Turtle::forward(double distance, std::vector<float>& vertices){
     std::vector<float> cylinder_vertices = cylinder.generateTriangles();
     for(int i = 0; i<cylinder_vertices.size(); i++){
         vertices.push_back(cylinder_vertices[i]);
+    }
+    if(bottom_radius>=2) return;
+    Leaf leaf = Leaf(position, new_position, bottom_radius, top_radius);
+    std::vector<float> leaf_vertices_ = leaf.generateVertices();
+    for(int i = 0; i<leaf_vertices_.size(); i++){
+        leaf_vertices.push_back(leaf_vertices_[i]);
     }
 }
 // This function is to save the current state of the turtle. This is used when the turtle encounters a '[' symbol. 
@@ -115,11 +122,15 @@ void Turtle::drawLine(std::vector<float> vertices, unsigned int &shaderprogram, 
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
 	unsigned int vVertex_attrib = getAttrib(shaderprogram, "vVertex");
-	glEnableVertexAttribArray(vVertex_attrib);
-	glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(vVertex_attrib);
+    glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
+    glEnableVertexAttribArray(texCord_attrib);
+    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// Draw the triangle
-	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 3);
+	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 5);
 
 	// Cleanup
 	glDisableVertexAttribArray(vVertex_attrib);
