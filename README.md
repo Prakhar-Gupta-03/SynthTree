@@ -1,7 +1,5 @@
 # L-system-tree-modelling
-Implementation of the paper "L-systems: from the theory to visual models of plants" as a course project for CSE333: Computer Graphics
-
-Implementation of the paper "[L-systems: From the theory to visual models of plants](http://algorithmicbotany.org/papers/l-sys.csiro96.pdf)" as the course project for the course CSE333: Computer Graphics at IIIT Delhi. The project was done by "[Shreyas Kabra](https://github.com/shreyas21563/)" and "[Prakhar Gupta](https://github.com/Prakhar-Gupta-03/)".
+Implementation of the paper [L-systems: From the theory to visual models of plants](http://algorithmicbotany.org/papers/l-sys.csiro96.pdf) as the course project for the course CSE333: Computer Graphics at IIIT Delhi. The project was done by [Shreyas Kabra](https://github.com/shreyas21563/) and [Prakhar Gupta](https://github.com/Prakhar-Gupta-03/).
 
 ## Pre-requisites: 
 * OpenGL (version 3.3 or above)
