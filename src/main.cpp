@@ -10,13 +10,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../depends/stb/stb_image.h"
 
-GLuint tex;
+GLuint tree_texture;
+GLuint tex1, tex2, tex3;
 
-bool loadImagetoTexture(const char *filename)
+bool loadImagetoTexture(const char *filename, GLuint &tex)
 {
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
@@ -46,7 +46,10 @@ int main(int, char **)
 	// create shader program
 	unsigned int shaderprogram = createProgram("shaders/vshader.vs", "shaders/fshader.fs");
 	
-	assert(loadImagetoTexture("textures/texture2.jpg"));
+	assert(loadImagetoTexture("textures/texture1.jpg", tex1));
+	assert(loadImagetoTexture("textures/texture2.jpg", tex2));
+	assert(loadImagetoTexture("textures/texture3.jpg", tex3));
+	assert(loadImagetoTexture("textures/texture1.jpg", tree_texture));
 
 	// Setup camera
 	glm::vec3 cam_position = glm::vec3(0.0f, 0.0f, 20.0f), cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f), cam_up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -85,7 +88,7 @@ int main(int, char **)
 	// splitting the string into modules. Each module is a single instruction for the turtle
 	std::vector<std::string> modules = l_system.generateModule(word); 
 	
-	glm::vec3 turtle_pos = glm::vec3(0,0,0); // initial position of the turtle
+	glm::vec3 turtle_pos = glm::vec3(0,-500,0); // initial position of the turtle
 	// initial HLU space of the turtle
 	glm::mat4 HLU = glm::transpose(glm::mat3(glm::vec3(0,1,0), glm::vec3(-1,0,0), glm::vec3(0,0,1))); 
 	
@@ -132,6 +135,24 @@ int main(int, char **)
 			cam->process_input(window, delta_time);
 			cam->setViewTransformation(shaderprogram);
 		}
+		
+		ImGui::Begin("Select Texture");
+		ImGui::Text("Select Texture");
+		ImGui::Text("Texture 1");
+		if(ImGui::ImageButton((void*)(intptr_t)tex1, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			assert(loadImagetoTexture("textures/texture1.jpg", tree_texture));
+		}
+		ImGui::Text("Texture 2");
+		if(ImGui::ImageButton((void*)(intptr_t)tex2, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			assert(loadImagetoTexture("textures/texture2.jpg", tree_texture));
+		}
+		ImGui::Text("Texture 3");
+		if(ImGui::ImageButton((void*)(intptr_t)tex3, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			assert(loadImagetoTexture("textures/texture3.jpg", tree_texture));
+		}
+
+		ImGui::End();
+
 
 		// Rendering
 		ImGui::Render();
@@ -140,8 +161,12 @@ int main(int, char **)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(WHITE.x, WHITE.y, WHITE.z, WHITE.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		turtle.drawTriangle(vertices, shaderprogram, VAO, VBO);
+		for(int i = 0; i<vertices.size(); i+=15){
+			std::vector<float> v = {vertices[i], vertices[i+1], vertices[i+2], vertices[i+3], vertices[i+4], vertices[i+5], vertices[i+6], vertices[i+7], vertices[i+8], vertices[i+9], vertices[i+10], vertices[i+11], vertices[i+12], vertices[i+13], vertices[i+14]};
+			turtle.drawTriangle(v, shaderprogram, VAO, VBO);
+		}
 
+		// turtle.drawTriangle(vertices, shaderprogram, VAO, VBO);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);

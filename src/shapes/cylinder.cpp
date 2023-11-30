@@ -11,7 +11,7 @@ void append(std::vector<float>& v, glm::vec3 a, glm::vec2 b){
 std::vector<float> Cylinder::generateTriangles(){
     float PI = 3.141592653589793;
     std::vector<float> v;
-    float segments = 360.0f;
+    float segments = 10.0f;
     for(float i = 0.0f; i<segments; i++){
         float theta1 = 2 * i*PI/segments;
         float theta2 = 2 * (i+1)*PI/segments;
