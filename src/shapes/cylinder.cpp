@@ -27,7 +27,7 @@ std::vector<float> Cylinder::generateTriangles(){
 
         append(v, v1_bottom, v1_bottom_uv);
         append(v, v2_bottom, v2_bottom_uv);
-        append(v, b, glm::vec2(0.5f, 0.5f));
+        append(v, a, glm::vec2(0.5f, 0.5f));
 
         append(v, v1_top, v1_top_uv);
         append(v, v2_top, v2_top_uv);

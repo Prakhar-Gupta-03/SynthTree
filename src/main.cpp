@@ -82,9 +82,9 @@ void drawLine(std::vector<float> vertices, unsigned int &shaderprogram, unsigned
     glEnableVertexAttribArray(vVertex_attrib);
     glVertexAttribPointer(vVertex_attrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 
-    unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
-    glEnableVertexAttribArray(texCord_attrib);
-    glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    // unsigned int texCord_attrib = getAttrib(shaderprogram, "texCord");
+    // glEnableVertexAttribArray(texCord_attrib);
+    // glVertexAttribPointer(texCord_attrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// Draw the triangle
 	glDrawArrays(GL_LINE_STRIP, 0, vertices.size() / 5);
@@ -124,6 +124,53 @@ void drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsi
 
 }
 
+void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree){
+	// display a window to get the custom parameters
+	ImGui::SetNextWindowPos(ImVec2(SCREEN_W/2 - 150, SCREEN_H/2 - 150));
+	ImGui::SetNextWindowSize(ImVec2(300, 300));
+	ImGui::Begin("Custom Tree Parameters");
+	ImGui::Text("Custom Tree Parameters");
+	// initialize the constants
+	float alpha1, alpha2, r1, r2, rho1, rho2, q, e, min, scale, leaf_threshold;
+	int recursive_steps_tree1;
+	bool isChanged;
+	recursive_steps_tree1, isChanged = ImGui::SliderInt("Recursive Steps", &recursive_steps_tree1, 0, 20);
+	scale, isChanged = ImGui::SliderFloat("Scale", &scale, 0.01, 0.1);
+	leaf_threshold, isChanged = ImGui::SliderFloat("Leaf Threshold", &leaf_threshold, 0.0, 50.0);
+	alpha1, isChanged = ImGui::SliderFloat("Alpha1", &alpha1, -90.0, 90.0);
+	alpha2, isChanged = ImGui::SliderFloat("Alpha2", &alpha2, -90.0, 90.0);
+	r1, isChanged = ImGui::SliderFloat("R1", &r1, 0.0, 1.0);
+	r2, isChanged = ImGui::SliderFloat("R2", &r2, 0.0, 1.0);
+	rho1, isChanged = ImGui::SliderFloat("Rho1", &rho1, -180.0, 180.0);
+	rho2, isChanged = ImGui::SliderFloat("Rho2", &rho2, -180.0, 180.0);
+	q, isChanged = ImGui::SliderFloat("Q", &q, 0.0, 1.0);
+	e, isChanged = ImGui::SliderFloat("E", &e, 0.0, 1.0);
+	min, isChanged = ImGui::SliderFloat("Min", &min, 0.0, 50.0);
+	if(ImGui::Button("Generate Tree")){
+		std::vector<std::string> tree_production_rules = {
+			"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
+			"F(s):True?F(s)"
+		};
+		std::string axiom_tree1 = "A(100,30)";
+		std::unordered_map<std::string, double> constants_tree1 = {
+			{"alpha1",alpha1},
+			{"alpha2",alpha2},
+			{"r1",r1},
+			{"r2",r2},
+			{"rho1",rho1},
+			{"rho2",rho2},
+			{"q",q},
+			{"e",e},
+			{"min",min}
+		};
+		int recursive_steps_tree1 = 10;
+		std::vector<std::vector<float>> v_tree1 = getVertices(tree_production_rules, constants_tree1, axiom_tree1, recursive_steps_tree1, scale, leaf_threshold);
+		v_tree = v_tree1;
+		custom_tree = false;
+	}
+	ImGui::End();
+}
+
 int main(int, char **)
 {
 	// Setup window
@@ -135,6 +182,7 @@ int main(int, char **)
 
 	// create shader program
 	unsigned int shaderprogram = createProgram("shaders/vshader.vs", "shaders/fshader.fs");
+	unsigned int shaderprogram_ = createProgram("shaders/vshader_.vs", "shaders/fshader_.fs");
 	
 	// Loading textures with error check
 	assert(loadImagetoTexture("textures/texture1.jpg", tex1));
@@ -154,7 +202,9 @@ int main(int, char **)
 	cam->setProjectionTransformation(shaderprogram);
 	cam->setViewTransformation(shaderprogram);
 	cam->setModelTransformation(shaderprogram);
-
+	cam->setProjectionTransformation(shaderprogram_);
+	cam->setViewTransformation(shaderprogram_);
+	cam->setModelTransformation(shaderprogram_);
 	// Defining L-System
 	std::vector<std::string> tree_production_rules = {
 		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
@@ -202,17 +252,17 @@ int main(int, char **)
 	};
 	int recursive_steps_tree3 = 12;
 
-	std::string axiom_fractal = "F(50)-(120)F(50)-(120)F(50)";
+	std::string axiom_fractal = "F(1)-(120)F(1)-(120)F(1)";
 	std::unordered_map<std::string, double> constants_fractal;
 	std::vector<std::string> flower_production_rules = {
 		"F(s):True?F(s/3)+(60)F(s/3)-(120)F(s/3)+(60)F(s/3)"
 	};
-	int recursive_steps_fractal = 5;
+	int recursive_steps_fractal = 1;
 
 	std::vector<std::vector<float>> v_tree1 = getVertices(tree_production_rules, constants_tree1, axiom_tree1, recursive_steps_tree1, 0.02, 2);
 	std::vector<std::vector<float>> v_tree2 = getVertices(tree_production_rules, constants_tree2, axiom_tree2, recursive_steps_tree2, 0.02, 20);
 	std::vector<std::vector<float>> v_tree3 = getVertices(tree_production_rules, constants_tree3, axiom_tree3, recursive_steps_tree3, 0.02, 5); 
-	std::vector<std::vector<float>> v_fractal = getVertices(flower_production_rules, constants_fractal, axiom_fractal, recursive_steps_fractal, 1.0, 0);
+	std::vector<std::vector<float>> v_fractal = getVertices(flower_production_rules, constants_fractal, axiom_fractal, recursive_steps_fractal, 0.02, 0);
 	std::vector<std::vector<float>> v_tree = v_tree1;
 
 	// Setting up VAO and VBO
@@ -230,6 +280,8 @@ int main(int, char **)
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+
+	bool custom_tree = false;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Start the Dear ImGui frame
@@ -247,6 +299,7 @@ int main(int, char **)
 		{
 			cam->process_input(window, delta_time);
 			cam->setViewTransformation(shaderprogram);
+			cam->setViewTransformation(shaderprogram_);
 		}
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -313,7 +366,15 @@ int main(int, char **)
 			tree_num = 3;
 			v_tree = v_tree3;
 		}
+		if (ImGui::RadioButton("Custom", tree_num==4)){
+			tree_num = 4;
+			custom_tree = true;
+		}
 		ImGui::End();
+		if (custom_tree){
+			customTreeWindow(v_tree, custom_tree);
+		}
+		// Custom Tree Parameters Sliding Bar ImG
 
 		// Rendering
 		ImGui::Render();
@@ -340,11 +401,9 @@ int main(int, char **)
 		// }
 		for (int i = 0; i<v_fractal[0].size(); i+=10){
 			std::vector<float> v = {v_fractal[0][i], v_fractal[0][i+1], v_fractal[0][i+2], v_fractal[0][i+3], v_fractal[0][i+4], v_fractal[0][i+5], v_fractal[0][i+6], v_fractal[0][i+7], v_fractal[0][i+8], v_fractal[0][i+9]};
-			drawLine(v, shaderprogram, VAO, VBO);
+			drawLine(v, shaderprogram_, VAO, VBO);
 			std::cout << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << " " << v[4] << " " << v[5] << " " << v[6] << " " << v[7] << " " << v[8] << " " << v[9] << std::endl;
 		}
-
-		// turtle.drawTriangle(vertices, shaderprogram, VAO, VBO);
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
