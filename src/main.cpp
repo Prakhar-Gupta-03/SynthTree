@@ -37,14 +37,9 @@ bool loadImagetoTexture(const char *filename, GLuint &tex)
 	return true;
 }
 
-std::vector<std::vector<float>> getVertices(std::unordered_map<std::string, double> &constants, std::string axiom, int recursive_steps, float scale, float leaf_threshold){
+std::vector<std::vector<float>> getVertices(std::vector<std::string> production_rules, std::unordered_map<std::string, double> &constants, std::string axiom, int recursive_steps, float scale, float leaf_threshold){
 	std::vector<std::string> alphabets = {"A", "F"};
 	std::vector<std::string> symbols = {"+", "[", "]", "!", "/"};
-
-	std::vector<std::string> production_rules = {
-		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
-		"F(s):True?F(s)"
-	};
 
 	L_System l_system(axiom, alphabets, constants, production_rules, symbols);
 
@@ -135,18 +130,21 @@ int main(int, char **)
 	GLFWwindow *window = setupWindow(SCREEN_W, SCREEN_H, "L-System Based Tree/Plant Modelling"); // Initialize Window
 	ImGuiIO &io = ImGui::GetIO(); // Create IO
 
-	// // Time variables
+	// Time variables
 	double last_time = 0, delta_time = 0; 
 
 	// create shader program
 	unsigned int shaderprogram = createProgram("shaders/vshader.vs", "shaders/fshader.fs");
 	
+	// Loading textures with error check
 	assert(loadImagetoTexture("textures/texture1.jpg", tex1));
 	assert(loadImagetoTexture("textures/texture2.jpg", tex2));
 	assert(loadImagetoTexture("textures/texture3.jpg", tex3));
 	assert(loadImagetoTexture("textures/leaf_texture1.jpeg", leaf_tex1));
 	assert(loadImagetoTexture("textures/leaf_texture2.jpg", leaf_tex2));
 	assert(loadImagetoTexture("textures/leaf_texture3.jpg", leaf_tex3));
+
+	// Texture initialization
 	leaf_texture = leaf_tex1;
 	tree_texture = tex1;
 
@@ -158,7 +156,10 @@ int main(int, char **)
 	cam->setModelTransformation(shaderprogram);
 
 	// Defining L-System
-	
+	std::vector<std::string> tree_production_rules = {
+		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
+		"F(s):True?F(s)"
+	};
 	std::string axiom_tree1 = "A(100,30)";
 	std::unordered_map<std::string, double> constants_tree1 = {
 		{"alpha1",30},
@@ -200,10 +201,18 @@ int main(int, char **)
 		{"min",5.0}
 	};
 	int recursive_steps_tree3 = 12;
-	
-	std::vector<std::vector<float>> v_tree1 = getVertices(constants_tree1, axiom_tree1, recursive_steps_tree1, 0.02, 2);
-	std::vector<std::vector<float>> v_tree2 = getVertices(constants_tree2, axiom_tree2, recursive_steps_tree2, 0.02, 20);
-	std::vector<std::vector<float>> v_tree3 = getVertices(constants_tree3, axiom_tree3, recursive_steps_tree3, 0.02, 5); 
+
+	std::string axiom_fractal = "F(50)-(120)F(50)-(120)F(50)";
+	std::unordered_map<std::string, double> constants_fractal;
+	std::vector<std::string> flower_production_rules = {
+		"F(s):True?F(s/3)+(60)F(s/3)-(120)F(s/3)+(60)F(s/3)"
+	};
+	int recursive_steps_fractal = 5;
+
+	std::vector<std::vector<float>> v_tree1 = getVertices(tree_production_rules, constants_tree1, axiom_tree1, recursive_steps_tree1, 0.02, 2);
+	std::vector<std::vector<float>> v_tree2 = getVertices(tree_production_rules, constants_tree2, axiom_tree2, recursive_steps_tree2, 0.02, 20);
+	std::vector<std::vector<float>> v_tree3 = getVertices(tree_production_rules, constants_tree3, axiom_tree3, recursive_steps_tree3, 0.02, 5); 
+	std::vector<std::vector<float>> v_fractal = getVertices(flower_production_rules, constants_fractal, axiom_fractal, recursive_steps_fractal, 1.0, 0);
 	std::vector<std::vector<float>> v_tree = v_tree1;
 
 	// Setting up VAO and VBO
@@ -316,20 +325,24 @@ int main(int, char **)
 
 		glBindTexture(GL_TEXTURE_2D, tree_texture);
 
-		for(int i = 0; i<v_tree[0].size(); i+=15){
-			std::vector<float> v = {v_tree[0][i], v_tree[0][i+1], v_tree[0][i+2], v_tree[0][i+3], v_tree[0][i+4], v_tree[0][i+5], v_tree[0][i+6], v_tree[0][i+7], v_tree[0][i+8], v_tree[0][i+9], v_tree[0][i+10], v_tree[0][i+11], v_tree[0][i+12], v_tree[0][i+13], v_tree[0][i+14]};
-			drawTriangle(v, shaderprogram, VAO, VBO);
-		}
+		// for(int i = 0; i<v_tree[0].size(); i+=15){
+		// 	std::vector<float> v = {v_tree[0][i], v_tree[0][i+1], v_tree[0][i+2], v_tree[0][i+3], v_tree[0][i+4], v_tree[0][i+5], v_tree[0][i+6], v_tree[0][i+7], v_tree[0][i+8], v_tree[0][i+9], v_tree[0][i+10], v_tree[0][i+11], v_tree[0][i+12], v_tree[0][i+13], v_tree[0][i+14]};
+		// 	drawTriangle(v, shaderprogram, VAO, VBO);
+		// }
 
 		glBindTexture(GL_TEXTURE_2D, leaf_texture);
 
-		if(leaves){
-			for(int i = 0; i<v_tree[1].size(); i+=10){
-				std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
-				drawLine(v, shaderprogram, VAO, VBO);
-			}
+		// if(leaves){
+		// 	for(int i = 0; i<v_tree[1].size(); i+=10){
+		// 		std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
+		// 		drawLine(v, shaderprogram, VAO, VBO);
+		// 	}
+		// }
+		for (int i = 0; i<v_fractal[0].size(); i+=10){
+			std::vector<float> v = {v_fractal[0][i], v_fractal[0][i+1], v_fractal[0][i+2], v_fractal[0][i+3], v_fractal[0][i+4], v_fractal[0][i+5], v_fractal[0][i+6], v_fractal[0][i+7], v_fractal[0][i+8], v_fractal[0][i+9]};
+			drawLine(v, shaderprogram, VAO, VBO);
+			std::cout << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << " " << v[4] << " " << v[5] << " " << v[6] << " " << v[7] << " " << v[8] << " " << v[9] << std::endl;
 		}
-		
 
 		// turtle.drawTriangle(vertices, shaderprogram, VAO, VBO);
 
