@@ -41,7 +41,7 @@ Implementation of the paper "L-systems: from the theory to visual models of plan
 - [x] ImGui setup for types of trees
 - [x] ImGui setup for leaf and tree texture options
 - [x] ImGui setup for leaves or no leaves
-- [ ] ImGui setup for custom tree
+- [x] ImGui setup for custom tree
 
 ### Future Work: 
 - [ ] Generate multiple trees together
