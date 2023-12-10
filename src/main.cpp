@@ -248,17 +248,9 @@ int main(int, char **)
 	};
 	int recursive_steps_tree3 = 12;
 
-	std::string axiom_fractal = "F(1)-(120)F(1)-(120)F(1)";
-	std::unordered_map<std::string, double> constants_fractal;
-	std::vector<std::string> flower_production_rules = {
-		"F(s):True?F(s/3)+(60)F(s/3)-(120)F(s/3)+(60)F(s/3)"
-	};
-	int recursive_steps_fractal = 1;
-
 	std::vector<std::vector<float>> v_tree1 = getVertices(tree_production_rules, constants_tree1, axiom_tree1, recursive_steps_tree1, 0.02, 2);
 	std::vector<std::vector<float>> v_tree2 = getVertices(tree_production_rules, constants_tree2, axiom_tree2, recursive_steps_tree2, 0.02, 20);
 	std::vector<std::vector<float>> v_tree3 = getVertices(tree_production_rules, constants_tree3, axiom_tree3, recursive_steps_tree3, 0.02, 5); 
-	std::vector<std::vector<float>> v_fractal = getVertices(flower_production_rules, constants_fractal, axiom_fractal, recursive_steps_fractal, 0.02, 0);
 	std::vector<std::vector<float>> v_tree = v_tree1;
 
 	// Setting up VAO and VBO
@@ -397,11 +389,6 @@ int main(int, char **)
 				std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
 				drawLine(v, shaderprogram, VAO, VBO);
 			}
-		}
-		for (int i = 0; i<v_fractal[0].size(); i+=10){
-			std::vector<float> v = {v_fractal[0][i], v_fractal[0][i+1], v_fractal[0][i+2], v_fractal[0][i+3], v_fractal[0][i+4], v_fractal[0][i+5], v_fractal[0][i+6], v_fractal[0][i+7], v_fractal[0][i+8], v_fractal[0][i+9]};
-			drawLine(v, shaderprogram_, VAO, VBO);
-			std::cout << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << " " << v[4] << " " << v[5] << " " << v[6] << " " << v[7] << " " << v[8] << " " << v[9] << std::endl;
 		}
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
