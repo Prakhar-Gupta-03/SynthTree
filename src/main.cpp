@@ -124,28 +124,24 @@ void drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsi
 
 }
 
-void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree){
+void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree, int &recursive_steps_tree1, float &alpha1, float &alpha2, float &r1, float &r2, float &rho1, float &rho2, float &q, float &e, float &min, float &scale, int &leaf_threshold){
 	// display a window to get the custom parameters
 	ImGui::SetNextWindowPos(ImVec2(SCREEN_W/2 - 150, SCREEN_H/2 - 150));
 	ImGui::SetNextWindowSize(ImVec2(300, 300));
 	ImGui::Begin("Custom Tree Parameters");
 	ImGui::Text("Custom Tree Parameters");
-	// initialize the constants
-	float alpha1, alpha2, r1, r2, rho1, rho2, q, e, min, scale, leaf_threshold;
-	int recursive_steps_tree1;
-	bool isChanged;
-	recursive_steps_tree1, isChanged = ImGui::SliderInt("Recursive Steps", &recursive_steps_tree1, 0, 20);
-	scale, isChanged = ImGui::SliderFloat("Scale", &scale, 0.01, 0.1);
-	leaf_threshold, isChanged = ImGui::SliderFloat("Leaf Threshold", &leaf_threshold, 0.0, 50.0);
-	alpha1, isChanged = ImGui::SliderFloat("Alpha1", &alpha1, -90.0, 90.0);
-	alpha2, isChanged = ImGui::SliderFloat("Alpha2", &alpha2, -90.0, 90.0);
-	r1, isChanged = ImGui::SliderFloat("R1", &r1, 0.0, 1.0);
-	r2, isChanged = ImGui::SliderFloat("R2", &r2, 0.0, 1.0);
-	rho1, isChanged = ImGui::SliderFloat("Rho1", &rho1, -180.0, 180.0);
-	rho2, isChanged = ImGui::SliderFloat("Rho2", &rho2, -180.0, 180.0);
-	q, isChanged = ImGui::SliderFloat("Q", &q, 0.0, 1.0);
-	e, isChanged = ImGui::SliderFloat("E", &e, 0.0, 1.0);
-	min, isChanged = ImGui::SliderFloat("Min", &min, 0.0, 50.0);
+	static float vec4f[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
+	static int vec4i[4] = { 1, 5, 100, 255 };
+	ImGui::SliderInt("Recursive Steps", &recursive_steps_tree1, 1, 15);
+	ImGui::SliderFloat("Alpha1", &alpha1, -90, 90);
+	ImGui::SliderFloat("Alpha2", &alpha2, -90, 90);
+	ImGui::SliderFloat("r1", &r1, 0.0, 1.0);
+	ImGui::SliderFloat("r2", &r2, 0.0, 1.0);
+	ImGui::SliderFloat("rho1", &rho1, 0.0, 180.0);
+	ImGui::SliderFloat("rho2", &rho2, 0.0, 180.0);
+	ImGui::SliderFloat("q", &q, 0.0, 1.0);
+	ImGui::SliderFloat("e", &e, 0.0, 1.0);
+	ImGui::SliderFloat("min", &min, 0.0, 50.0);
 	if(ImGui::Button("Generate Tree")){
 		std::vector<std::string> tree_production_rules = {
 			"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
@@ -282,6 +278,9 @@ int main(int, char **)
 	glEnable(GL_BLEND);
 
 	bool custom_tree = false;
+	int recursive_steps_tree = 10;
+	float alpha1 = 35, alpha2 = -35, r1 = 0.75, r2 = 0.77, rho1 = 0, rho2 = 0, q = 0.50, e = 0.40, min = 0.0, scale = 0.02;
+	int leaf_threshold = 5;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Start the Dear ImGui frame
@@ -372,7 +371,7 @@ int main(int, char **)
 		}
 		ImGui::End();
 		if (custom_tree){
-			customTreeWindow(v_tree, custom_tree);
+			customTreeWindow(v_tree, custom_tree, recursive_steps_tree, alpha1, alpha2, r1, r2, rho1, rho2, q, e, min, scale, leaf_threshold);
 		}
 		// Custom Tree Parameters Sliding Bar ImG
 
@@ -386,19 +385,19 @@ int main(int, char **)
 
 		glBindTexture(GL_TEXTURE_2D, tree_texture);
 
-		// for(int i = 0; i<v_tree[0].size(); i+=15){
-		// 	std::vector<float> v = {v_tree[0][i], v_tree[0][i+1], v_tree[0][i+2], v_tree[0][i+3], v_tree[0][i+4], v_tree[0][i+5], v_tree[0][i+6], v_tree[0][i+7], v_tree[0][i+8], v_tree[0][i+9], v_tree[0][i+10], v_tree[0][i+11], v_tree[0][i+12], v_tree[0][i+13], v_tree[0][i+14]};
-		// 	drawTriangle(v, shaderprogram, VAO, VBO);
-		// }
+		for(int i = 0; i<v_tree[0].size(); i+=15){
+			std::vector<float> v = {v_tree[0][i], v_tree[0][i+1], v_tree[0][i+2], v_tree[0][i+3], v_tree[0][i+4], v_tree[0][i+5], v_tree[0][i+6], v_tree[0][i+7], v_tree[0][i+8], v_tree[0][i+9], v_tree[0][i+10], v_tree[0][i+11], v_tree[0][i+12], v_tree[0][i+13], v_tree[0][i+14]};
+			drawTriangle(v, shaderprogram, VAO, VBO);
+		}
 
 		glBindTexture(GL_TEXTURE_2D, leaf_texture);
 
-		// if(leaves){
-		// 	for(int i = 0; i<v_tree[1].size(); i+=10){
-		// 		std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
-		// 		drawLine(v, shaderprogram, VAO, VBO);
-		// 	}
-		// }
+		if(leaves){
+			for(int i = 0; i<v_tree[1].size(); i+=10){
+				std::vector<float> v = {v_tree[1][i], v_tree[1][i+1], v_tree[1][i+2], v_tree[1][i+3], v_tree[1][i+4], v_tree[1][i+5], v_tree[1][i+6], v_tree[1][i+7], v_tree[1][i+8], v_tree[1][i+9]};
+				drawLine(v, shaderprogram, VAO, VBO);
+			}
+		}
 		for (int i = 0; i<v_fractal[0].size(); i+=10){
 			std::vector<float> v = {v_fractal[0][i], v_fractal[0][i+1], v_fractal[0][i+2], v_fractal[0][i+3], v_fractal[0][i+4], v_fractal[0][i+5], v_fractal[0][i+6], v_fractal[0][i+7], v_fractal[0][i+8], v_fractal[0][i+9]};
 			drawLine(v, shaderprogram_, VAO, VBO);
