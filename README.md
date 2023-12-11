@@ -42,11 +42,11 @@ Implementation of the paper "L-systems: from the theory to visual models of plan
 - [x] ImGui setup for leaf and tree texture options
 - [x] ImGui setup for leaves or no leaves
 - [x] ImGui setup for custom tree
+- [x] Generating flowers
+- [x] Texturing of flowers
 
 ### Future Work: 
 - [ ] Generate multiple trees together
-- [ ] Generating flowers
-- [ ] Texturing of flowers
 - [ ] Flowers using fractals
 - [ ] Demonstrating growth of plants/trees
 - [ ] Simulate insect eating plant/tree
