@@ -124,10 +124,10 @@ void drawTriangle(std::vector<float> vertices, unsigned int &shaderprogram, unsi
 
 }
 
-void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree, int &recursive_steps_tree1, float &alpha1, float &alpha2, float &r1, float &r2, float &rho1, float &rho2, float &q, float &e, float &min, float &scale, int &leaf_threshold){
+void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree, int &recursive_steps_tree1, float &alpha1, float &alpha2, float &r1, float &r2, float &rho1, float &rho2, float &q, float &e, float &min, float &w0, float &scale, float &leaf_threshold){
 	// display a window to get the custom parameters
 	ImGui::SetNextWindowPos(ImVec2(SCREEN_W/2 - 150, SCREEN_H/2 - 150));
-	ImGui::SetNextWindowSize(ImVec2(300, 300));
+	ImGui::SetNextWindowSize(ImVec2(400, 350));
 	ImGui::Begin("Custom Tree Parameters");
 	ImGui::Text("Custom Tree Parameters");
 	static float vec4f[4] = { 0.10f, 0.20f, 0.30f, 0.44f };
@@ -142,12 +142,13 @@ void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree
 	ImGui::SliderFloat("q", &q, 0.0, 1.0);
 	ImGui::SliderFloat("e", &e, 0.0, 1.0);
 	ImGui::SliderFloat("min", &min, 0.0, 50.0);
+	ImGui::SliderFloat("w0", &w0, 0.0, 50.0);
 	if(ImGui::Button("Generate Tree")){
 		std::vector<std::string> tree_production_rules = {
 			"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
 			"F(s):True?F(s)"
 		};
-		std::string axiom_tree1 = "A(100,30)";
+		std::string axiom_tree1 = "A(100," + std::to_string(w0) + ")";
 		std::unordered_map<std::string, double> constants_tree1 = {
 			{"alpha1",alpha1},
 			{"alpha2",alpha2},
@@ -159,7 +160,7 @@ void customTreeWindow(std::vector<std::vector<float>> &v_tree, bool &custom_tree
 			{"e",e},
 			{"min",min}
 		};
-		int recursive_steps_tree1 = 10;
+		// int recursive_steps_tree1 = 10;
 		std::vector<std::vector<float>> v_tree1 = getVertices(tree_production_rules, constants_tree1, axiom_tree1, recursive_steps_tree1, scale, leaf_threshold);
 		v_tree = v_tree1;
 		custom_tree = false;
@@ -178,7 +179,6 @@ int main(int, char **)
 
 	// create shader program
 	unsigned int shaderprogram = createProgram("shaders/vshader.vs", "shaders/fshader.fs");
-	unsigned int shaderprogram_ = createProgram("shaders/vshader_.vs", "shaders/fshader_.fs");
 	
 	// Loading textures with error check
 	assert(loadImagetoTexture("textures/texture1.jpg", tex1));
@@ -198,9 +198,7 @@ int main(int, char **)
 	cam->setProjectionTransformation(shaderprogram);
 	cam->setViewTransformation(shaderprogram);
 	cam->setModelTransformation(shaderprogram);
-	cam->setProjectionTransformation(shaderprogram_);
-	cam->setViewTransformation(shaderprogram_);
-	cam->setModelTransformation(shaderprogram_);
+
 	// Defining L-System
 	std::vector<std::string> tree_production_rules = {
 		"A(s,w):s>=min?!(w)F(s)[+(alpha1)/(rho1)A(s*r1,w*(q^e))][+(alpha2)/(rho2)A(s*r2,w*((1-q)^e))]",
@@ -270,9 +268,9 @@ int main(int, char **)
 	glEnable(GL_BLEND);
 
 	bool custom_tree = false;
-	int recursive_steps_tree = 10;
-	float alpha1 = 35, alpha2 = -35, r1 = 0.75, r2 = 0.77, rho1 = 0, rho2 = 0, q = 0.50, e = 0.40, min = 0.0, scale = 0.02;
-	int leaf_threshold = 5;
+	int recursive_steps_tree = 12;
+	float alpha1 = -5, alpha2 = 30, r1 = 0.55, r2 = 0.95, rho1 = 137, rho2 = 137, q = 0.40, e = 0.25, min = 5.0, scale = 0.02, w0 = 20;
+	float leaf_threshold = 5;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Start the Dear ImGui frame
@@ -290,7 +288,6 @@ int main(int, char **)
 		{
 			cam->process_input(window, delta_time);
 			cam->setViewTransformation(shaderprogram);
-			cam->setViewTransformation(shaderprogram_);
 		}
 
 		ImGui::SetNextWindowPos(ImVec2(10, 10));
@@ -342,7 +339,7 @@ int main(int, char **)
 		ImGui::End();
 
 		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 160, 300));
-		ImGui::SetNextWindowSize(ImVec2(150, 125));
+		ImGui::SetNextWindowSize(ImVec2(150, 145));
 		ImGui::Begin("Select Tree");
 		ImGui::Text("Select Tree");
 		if(ImGui::RadioButton("Tree 1", tree_num==1)){
@@ -363,7 +360,7 @@ int main(int, char **)
 		}
 		ImGui::End();
 		if (custom_tree){
-			customTreeWindow(v_tree, custom_tree, recursive_steps_tree, alpha1, alpha2, r1, r2, rho1, rho2, q, e, min, scale, leaf_threshold);
+			customTreeWindow(v_tree, custom_tree, recursive_steps_tree, alpha1, alpha2, r1, r2, rho1, rho2, q, e, min, w0, scale, leaf_threshold);
 		}
 		// Custom Tree Parameters Sliding Bar ImG
 
@@ -374,7 +371,9 @@ int main(int, char **)
 		glViewport(0, 0, display_w, display_h);
 		glClearColor(WHITE.x, WHITE.y, WHITE.z, WHITE.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
+		
+		glUseProgram(shaderprogram);
 		glBindTexture(GL_TEXTURE_2D, tree_texture);
 
 		for(int i = 0; i<v_tree[0].size(); i+=15){
