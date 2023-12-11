@@ -1,13 +1,15 @@
 #include "turtle.h"
 #include "shapes/leaf.h"
+#include "shapes/flower.h"
 // Using the modules, the turtle will parse the string and return a vector of vertices that will be drawn. The meaning of the symbols are the same as used in the paper provided.
 std::vector<std::vector<float>> Turtle::parser(std::vector<std::string> modules) {
     std::vector<float> vertices;
     std::vector<float> leaf_vertices;
+    std::vector<float> flower_vertices;
     for(int i = 0; i<modules.size(); i++){
         std::string module = modules[i];
         if(module[0]=='F'){
-            forward(std::stod(module.substr(2, module.size()-3)), vertices, leaf_vertices);
+            forward(std::stod(module.substr(2, module.size()-3)), vertices, leaf_vertices, flower_vertices);
         }else if(module[0]=='['){
             saveState();
         }else if(module[0]==']'){
@@ -28,11 +30,11 @@ std::vector<std::vector<float>> Turtle::parser(std::vector<std::string> modules)
             Rl(-std::stod(module.substr(2, module.size()-3)));
         }
     }
-    return {vertices, leaf_vertices};
+    return {vertices, leaf_vertices, flower_vertices};
 }
 
 // This function is to move the turtle forward by a certain distance and add the vertices to the vector of vertices.
-void Turtle::forward(double distance, std::vector<float>& vertices, std::vector<float>& leaf_vertices){ 
+void Turtle::forward(double distance, std::vector<float>& vertices, std::vector<float>& leaf_vertices, std::vector<float>& flower_vertices){ 
     glm::vec3 position = current_state.getPosition();
     glm::mat3 HLU = current_state.getHLU();
     glm::vec3 direction_f = glm::transpose(HLU)[0], direction_l = glm::transpose(HLU)[1];
@@ -56,6 +58,11 @@ void Turtle::forward(double distance, std::vector<float>& vertices, std::vector<
     std::vector<float> leaf_vertices_ = leaf.generateVertices();
     for(int i = 0; i<leaf_vertices_.size(); i++){
         leaf_vertices.push_back(leaf_vertices_[i]);
+    }
+    Flower flower = Flower(position, new_position, bottom_radius, top_radius);
+    std::vector<float> flower_vertices_ = flower.generateVertices();
+    for(int i = 0; i<flower_vertices_.size(); i++){
+        flower_vertices.push_back(flower_vertices_[i]);
     }
 }
 // This function is to save the current state of the turtle. This is used when the turtle encounters a '[' symbol. 

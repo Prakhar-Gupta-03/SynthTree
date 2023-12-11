@@ -21,5 +21,5 @@ public:
     void Rh(double angle);
     void Rl(double angle);
     void changeWidth(double width);
-    void forward(double distance, std::vector<float>& vertices, std::vector<float>& leaf_vertices);
+    void forward(double distance, std::vector<float>& vertices, std::vector<float>& leaf_vertices, std::vector<float>& flower_vertices);
 };

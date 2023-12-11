@@ -21,6 +21,7 @@ set(SOURCES
 	"src/turtle/turtle.cpp"
 	"src/shapes/cylinder.cpp"
 	"src/shapes/leaf.cpp"
+	"src/shapes/flower.cpp"
 	"depends/imgui/imgui_impl_glfw.cpp"
 	"depends/imgui/imgui_impl_opengl3.cpp"
 	"depends/imgui/imgui.cpp"

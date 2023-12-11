@@ -11,10 +11,11 @@
 #include "../depends/stb/stb_image.h"
 #include "imgui.h"
 
-GLuint tree_texture, leaf_texture;
+GLuint tree_texture, leaf_texture, flower_texture;
 GLuint tex1, tex2, tex3;
 GLuint leaf_tex1, leaf_tex2, leaf_tex3;
-bool leaves = true;
+GLuint flower_tex1, flower_tex2, flower_tex3;
+bool leaves = true, flower = true;
 int tree_num = 1;
 
 bool loadImagetoTexture(const char *filename, GLuint &tex)
@@ -187,10 +188,14 @@ int main(int, char **)
 	assert(loadImagetoTexture("textures/leaf_texture1.jpeg", leaf_tex1));
 	assert(loadImagetoTexture("textures/leaf_texture2.jpg", leaf_tex2));
 	assert(loadImagetoTexture("textures/leaf_texture3.jpg", leaf_tex3));
+	assert(loadImagetoTexture("textures/flower_texture1.jpg", flower_tex1));
+	assert(loadImagetoTexture("textures/flower_texture2.jpg", flower_tex2));
+	assert(loadImagetoTexture("textures/flower_texture3.jpg", flower_tex3));
 
 	// Texture initialization
 	leaf_texture = leaf_tex1;
 	tree_texture = tex1;
+	flower_texture = flower_tex1;
 
 	// Setup camera
 	glm::vec3 cam_position = glm::vec3(0.0f, 0.0f, 20.0f), cam_look_at = glm::vec3(0.0f, 0.0f, 0.0f), cam_up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -320,6 +325,17 @@ int main(int, char **)
 		}
 		ImGui::End();
 
+		ImGui::SetNextWindowPos(ImVec2(10, 450));
+		ImGui::SetNextWindowSize(ImVec2(150, 100));
+		ImGui::Begin("Flowers or not ?");
+		if(ImGui::RadioButton("Flowers", flower)){
+			flower = true;
+		}
+		if(ImGui::RadioButton("No Flowers", !flower)){
+			flower = false;
+		}
+		ImGui::End();
+
 		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 160, 10));
 		ImGui::SetNextWindowSize(ImVec2(150, 275));
 		ImGui::Begin("Select Leaf Texture");
@@ -337,6 +353,25 @@ int main(int, char **)
 			leaf_texture = leaf_tex3;
 		}
 		ImGui::End();
+
+		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 320, 10));
+		ImGui::SetNextWindowSize(ImVec2(150, 275));
+		ImGui::Begin("Select Flower Texture");
+		ImGui::Text("Select Texture");
+		ImGui::Text("Texture 1");
+		if(ImGui::ImageButton((void*)(intptr_t)flower_tex1, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			flower_texture = flower_tex1;
+		}
+		ImGui::Text("Texture 2");
+		if(ImGui::ImageButton((void*)(intptr_t)flower_tex2, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			flower_texture = flower_tex2;
+		}
+		ImGui::Text("Texture 3");
+		if(ImGui::ImageButton((void*)(intptr_t)flower_tex3, ImVec2((float)50, (float)50), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), 1, ImVec4(0.0f, 0.0f, 0.0f, 0.0f), ImVec4(1.0f, 1.0f, 1.0f, 1.0f))){
+			flower_texture = flower_tex3;
+		}
+		ImGui::End();
+
 
 		ImGui::SetNextWindowPos(ImVec2(SCREEN_W - 160, 300));
 		ImGui::SetNextWindowSize(ImVec2(150, 145));
@@ -373,7 +408,7 @@ int main(int, char **)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-		glUseProgram(shaderprogram);
+		// glUseProgram(shaderprogram);
 		glBindTexture(GL_TEXTURE_2D, tree_texture);
 
 		for(int i = 0; i<v_tree[0].size(); i+=15){
@@ -389,6 +424,15 @@ int main(int, char **)
 				drawLine(v, shaderprogram, VAO, VBO);
 			}
 		}
+
+		glBindTexture(GL_TEXTURE_2D, flower_texture);
+		if(flower){
+			for(int i = 0; i<v_tree[2].size(); i+=10){
+				std::vector<float> v = {v_tree[2][i], v_tree[2][i+1], v_tree[2][i+2], v_tree[2][i+3], v_tree[2][i+4], v_tree[2][i+5], v_tree[2][i+6], v_tree[2][i+7], v_tree[2][i+8], v_tree[2][i+9]};
+				drawLine(v, shaderprogram, VAO, VBO);
+			}
+		}
+		
 
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
